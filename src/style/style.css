@@ -1,0 +1,68 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    border: 3px solid black;
+    width: 75%;
+    margin: 0 auto;
+    margin-bottom: 25px;
+    border-collapse: collapse;
+}
+
+th {
+    border: 2px solid black;
+    width: 33%;
+}
+
+td {
+    border: 2px solid black;
+    text-align: center;
+}
+
+.board-title {
+    text-align: center;
+    border: 3px solid black;
+    width: 74.5%;
+    margin: 0px auto;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: large;
+}
+
+.no-todo-message{
+    text-align: center;
+    color: red;
+}
+
+h1 {
+    text-align: center;
+}
+
+form {
+    margin: 0 auto;
+    margin-bottom: 25px;
+    width: 75%;
+    text-align: center;
+    border: 3px solid black;
+    border-radius: 25px;
+}
+
+input[type="submit"], label {
+    display: block;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+button {
+    margin: 10px 0 auto;
+    margin-bottom: 10px;
+}
+
+.modal-form {
+    width: 100%;
+    border: none;
+}
