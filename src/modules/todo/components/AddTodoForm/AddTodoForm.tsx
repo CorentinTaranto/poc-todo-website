@@ -1,7 +1,8 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useState, useEffect } from "react";
 import Board from "../../../board/models/Board";
 import AddTodo from "../../models/AddTodo";
 import todoService from "../../services/todo.service";
+
 
 interface Props {
   boards: Board[];
@@ -13,9 +14,25 @@ const AddTodoForm = ({boards, onTodoCreated} : Props) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
+  const [error, setError] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setConfirmMessage(''), 2000);
+
+    return () => clearTimeout(timer);
+  }, [confirmMessage]);
 
   const createTodo = async (e : FormEvent) => {
     e.preventDefault();
+
+    setError(false);
+
+    if(title === '' || description === '') {
+      setError(true);
+      setConfirmMessage('One or more field have not been filled !');
+      return;
+    }
 
     const todoCreated : AddTodo = {
       title: title,
@@ -24,9 +41,15 @@ const AddTodoForm = ({boards, onTodoCreated} : Props) => {
       boardId: boardId
     }
 
-    const result = await todoService.addTodo(todoCreated);
-
-    onTodoCreated(result);
+    try {
+      const result = await todoService.addTodo(todoCreated);
+      onTodoCreated(result);
+      setConfirmMessage('The todo has been added to the list')
+    } catch(e) {
+      setError(true);
+      setConfirmMessage('An error has occured ! Check if the board selected isn t locked.');
+      return; 
+    }
 
     setBoardId(boards[0].id);
     setTitle('');
@@ -52,9 +75,10 @@ const AddTodoForm = ({boards, onTodoCreated} : Props) => {
         Description : <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
       </label>
       <label>
-        Deadline : <input type="text" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+        Deadline (test) : <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
       </label>
       <input type="submit" value="Create todo" />
+      <div className={error ? 'error' : 'confirm'}>{confirmMessage}</div>
     </form>
   );
 }

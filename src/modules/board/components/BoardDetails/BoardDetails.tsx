@@ -30,7 +30,7 @@ const BoardDetails = ({board, onUpdateBoard}: Props) => {
     }
 
     return (
-        <div>
+        <>
             <div className='board-title'>
                 {board.title} {board.isLocked && ("( Locked )")}
             </div>
@@ -38,7 +38,7 @@ const BoardDetails = ({board, onUpdateBoard}: Props) => {
                 <ListTodos todos={board.todos} onRemoveTodo={removeTodo} onUpdateTodo={updateTodo} /> 
             )}
             {!board.todos.length && renderNoTodoMessage()}
-        </div>
+        </>
     );
 };
 

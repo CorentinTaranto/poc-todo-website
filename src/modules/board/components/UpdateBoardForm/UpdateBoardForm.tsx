@@ -1,7 +1,8 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import Board from '../../models/Board';
 import UpdateBoard from '../../models/UpdateBoard';
 import boardService from '../../services/board.service';
+
 
 interface Props {
   boards: Board[];
@@ -12,16 +13,34 @@ const UpdateBoardForm = ({boards, onUpdateBoard}: Props) => {
   const [boardId, setBoardId] = useState(boards[0].id);
   const [boardToUpdateTitle, setBoardToUpdateTitle] = useState(boards[0].title);
   const [isBoardToUpdateLocked, setIsBoardToUpdateLocked] = useState(boards[0].isLocked);
+  const [confirmMessage, setConfirmMessage] = useState('');
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setConfirmMessage(''), 2000);
+
+    return () => clearTimeout(timer);
+  }, [confirmMessage]);
 
   const changeOption = (id: string) => {
-    setBoardId(id);
     const currentBoard: Board = boards.filter(board => board.id === id)[0];
+    setBoardId(id);
     setBoardToUpdateTitle(currentBoard.title);
     setIsBoardToUpdateLocked(currentBoard.isLocked);
   }
 
   const updateBoard = async (e: FormEvent) => {
     e.preventDefault();
+
+    setError(false);
+
+    if(boardToUpdateTitle === '') {
+      setError(true);
+      setConfirmMessage('The title field has not been filled !');
+      return;
+    }
+
+    setConfirmMessage('The board has been updated !');
 
     const board: UpdateBoard = {
       title: boardToUpdateTitle,
@@ -59,6 +78,7 @@ const UpdateBoardForm = ({boards, onUpdateBoard}: Props) => {
       </label>
 
       <input type="submit" value="Update board" />
+      <div className={error ? 'error' : 'confirm'}>{confirmMessage}</div>
     </form>
   );
 }

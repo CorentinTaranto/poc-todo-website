@@ -1,8 +1,10 @@
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import Todo from '../../models/Todo';
 import UpdateTodo from '../../models/UpdateTodo';
 import todoService from '../../services/todo.service';
+
+import styles from './UpdateTodoModal.module.scss';
 
 const customStyles = {
   content: {
@@ -12,6 +14,7 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
+    width: '40%',
   },
 };
 
@@ -25,7 +28,14 @@ Modal.setAppElement('#modal');
 const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
   const [title, setTitle] = useState(todo.title);
   const [description, setDescription] = useState(todo.description);
-  const [deadline, setDeadline] = useState(todo.deadline ? todo.deadline : '');
+  const [deadline, setDeadline] = useState(todo.deadline ? todo.deadline.substring(0,10) + 'T' + todo.deadline.substring(11, 16) : '');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setErrorMessage(''), 2000);
+
+    return () => clearTimeout(timer);
+  }, [errorMessage])
 
   let subtitle: any;
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -41,10 +51,15 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
   const updateTodo = async (e: FormEvent) => {
     e.preventDefault();
 
+    if(title === '' || description === '') {
+      setErrorMessage('One or more field have not been filled !');
+      return;
+    }
+
     const todoToUpdate: UpdateTodo = {
       title: title,
       description: description,
-      deadline: deadline
+      deadline: deadline === '' ? null : deadline
     };
 
     const result = await todoService.updateTodo(todo.id, todoToUpdate);
@@ -55,7 +70,7 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
   }
 
   return (
-    <div>
+    <>
       <button onClick={openModal}>Update todo</button>
       <Modal
         isOpen={modalIsOpen} 
@@ -64,9 +79,10 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
         contentLabel='Cotent label'
       >
 
-        <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Update of a todo</h2>
+        <button onClick={closeModal} className={styles.closeButton}>X</button>
+        <h2 className={styles.title} ref={(_subtitle) => (subtitle = _subtitle)}>Update of a todo</h2>
         
-        <form onSubmit={updateTodo} className='modal-form'>
+        <form onSubmit={updateTodo} className={styles.form}>
           <label>
             Title : <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
           </label>
@@ -74,14 +90,14 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
             Description : <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
           </label>
           <label>
-            Deadline : <input type="text" value={deadline} onChange={(e) => setDeadline(e.target.value)}/>
+            Deadline : <input type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
           </label>
-
-          <input type="submit" value="Update todo" />
+          
+          <input type="submit" value="Update todo" className={styles.submitButton} />
+          <div className='error'>{errorMessage}</div>
         </form>
-        <button onClick={closeModal}>close</button>
       </Modal>
-    </div>
+    </>
   );
 }
 
