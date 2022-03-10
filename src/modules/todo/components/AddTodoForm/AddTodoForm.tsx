@@ -1,5 +1,7 @@
 import React, { FormEvent, useState, useEffect } from "react";
+import { addTodoAsync } from "../../../board/board.slice";
 import Board from "../../../board/models/Board";
+import useAction from "../../../shared/hooks/useAction.hook";
 import AddTodo from "../../models/AddTodo";
 import todoService from "../../services/todo.service";
 
@@ -16,6 +18,8 @@ const AddTodoForm = ({boards, onTodoCreated} : Props) => {
   const [deadline, setDeadline] = useState('');
   const [error, setError] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState('');
+
+  const addTodo = useAction(addTodoAsync);
 
   useEffect(() => {
     const timer = setTimeout(() => setConfirmMessage(''), 2000);
@@ -42,8 +46,7 @@ const AddTodoForm = ({boards, onTodoCreated} : Props) => {
     }
 
     try {
-      const result = await todoService.addTodo(todoCreated);
-      onTodoCreated(result);
+      addTodo(todoCreated);
       setConfirmMessage('The todo has been added to the list')
     } catch(e) {
       setError(true);

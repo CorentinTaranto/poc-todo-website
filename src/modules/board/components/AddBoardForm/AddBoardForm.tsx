@@ -1,4 +1,6 @@
 import React, { FormEvent, useEffect, useState} from 'react';
+import useAction from '../../../shared/hooks/useAction.hook';
+import boardsSlice, { addBoardAsync, boardsAction, getAllBoardAsync } from '../../board.slice';
 
 import AddBoard from '../../models/AddBoard';
 import boardService from '../../services/board.service';
@@ -11,6 +13,8 @@ const AddBoardForm = ({onBoardCreated}: Props) => {
   const [title, setTitle] = useState('');
   const [confirmMessage, setConfirmMessage] = useState('');
   const [error, setError] = useState(false);
+
+  const addBoard = useAction(addBoardAsync);
 
   useEffect(() => {
     const timer = setTimeout(() => setConfirmMessage(''), 2000);
@@ -35,9 +39,7 @@ const AddBoardForm = ({onBoardCreated}: Props) => {
       title: title
     };
     
-    const result = await boardService.addBoard(newBoard);
-
-    onBoardCreated(result);
+    addBoard(newBoard);
 
     setTitle('');
   }

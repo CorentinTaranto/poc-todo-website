@@ -1,68 +1,50 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-import Board from '../../board/models/Board';
-import Todo from '../../todo/models/Todo';
-
-import BoardDetails from '../../board/components/BoardDetails';
-import AddBoardForm from '../../board/components/AddBoardForm';
-import UpdateBoardForm from '../../board/components/UpdateBoardForm';
-import AddTodoForm from '../../todo/components/AddTodoForm';
-import boardsService from '../services/boards.service';
+import { init } from '../../shared/utils/api.utils';
+import store from '../../shared/store';
+import { Provider } from 'react-redux';
+import BoardsList from '../../board/components/BoardsList';
 
 const App = () => {
-    const [boards, setBoards] = useState<Board[]>([]);
+    Notification.requestPermission((status) => {
+        console.log('Notification permission status:', status);
+    });
 
-    const addBoard = (board: Board) => {
-        setBoards([...boards, board]);
-    }
-
-    const addTodo = (todo: Todo) => {
-        const newBoards = boards.map((board) => {
-            if(board.id === todo.boardId) {
-                board.todos.push(todo);
-                return board;
-            }
-            return board;
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('service-worker.js')
+            .then((registration) => {
+              console.log('Service Worker is registered', registration);
+              registration.showNotification('Hello there !');
+            })
+            .catch((err) => {
+              console.error('Registration failed:', err);
+            });
         });
+      }
 
-        setBoards(newBoards);
-    }
-
-    const updateBoard = (board: Board) => {
-        const newBoards = boards.map((b) => {
-            if(b.id === board.id) {
-                return board;
-            }
-            return b;
+      function displayNotification() {
+        Notification.requestPermission(function(result) {
+          if (result === 'granted') {
+            navigator.serviceWorker.ready.then(function(registration) {
+              registration.showNotification('Vibration Sample', {
+                body: 'Buzz! Buzz!',
+                icon: '../images/touch/chrome-touch-icon-192x192.png',
+                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                tag: 'vibration-sample'
+              });
+            });
+          }
         });
+      }
 
-        setBoards(newBoards);
-    };
-
-    useEffect(() => {
-        const getBoards = async () => {
-            const result = await boardsService.getAll();
-            setBoards(result);
-        }
-
-        getBoards();
-    }, []);
+    init(store.store);
 
     return (
-        <>
-            {boards.map((board) => (
-                <BoardDetails key={board.id} board={board} onUpdateBoard={updateBoard}/>
-            ))}
-
-            <AddBoardForm onBoardCreated={addBoard}/>
-
-            {!!boards.length && (
-                <>
-                    <UpdateBoardForm boards={boards} onUpdateBoard={updateBoard} />
-                    <AddTodoForm boards={boards} onTodoCreated={addTodo} />
-                </>
-            )}
-        </>
+        <Provider store={store.store}>
+            <BoardsList />
+            <button onClick={displayNotification}>Test</button>
+        </Provider>
     );
 };
 

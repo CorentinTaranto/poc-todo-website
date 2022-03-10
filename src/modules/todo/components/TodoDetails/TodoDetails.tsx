@@ -1,4 +1,6 @@
 import React from 'react';
+import { changeTodoSectionAsync, removeTodoAsync } from '../../../board/board.slice';
+import useAction from '../../../shared/hooks/useAction.hook';
 
 import Todo from '../../models/Todo';
 import todoService from '../../services/todo.service';
@@ -13,10 +15,11 @@ interface Props {
 }
 
 const TodoDetails = ({todo, onRemoveTodo, onUpdateTodo} : Props) => {
-    const removeTodo = async () => {
-        await todoService.removeTodo(todo.id);
+    const removeTodoAction = useAction(removeTodoAsync);
+    const changeTodoSectionAction = useAction(changeTodoSectionAsync);
 
-        onRemoveTodo(todo.id);
+    const removeTodo = async () => {
+        removeTodoAction(todo);
     }
 
     const updateTodo = (todo: Todo) => {
@@ -24,9 +27,7 @@ const TodoDetails = ({todo, onRemoveTodo, onUpdateTodo} : Props) => {
     }
 
     const moveTodo = async () => {
-        const result = await todoService.changeTodoSection(todo.id);
-
-        onUpdateTodo(result);
+        changeTodoSectionAction(todo.id);
     }
 
     return (

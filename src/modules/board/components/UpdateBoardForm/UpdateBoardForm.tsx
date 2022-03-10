@@ -1,4 +1,6 @@
 import React, { FormEvent, useEffect, useState } from 'react';
+import useAction from '../../../shared/hooks/useAction.hook';
+import { updateBoardAsync, UpdateBoardData } from '../../board.slice';
 import Board from '../../models/Board';
 import UpdateBoard from '../../models/UpdateBoard';
 import boardService from '../../services/board.service';
@@ -15,6 +17,8 @@ const UpdateBoardForm = ({boards, onUpdateBoard}: Props) => {
   const [isBoardToUpdateLocked, setIsBoardToUpdateLocked] = useState(boards[0].isLocked);
   const [confirmMessage, setConfirmMessage] = useState('');
   const [error, setError] = useState(false);
+
+  const updateBoardAction = useAction(updateBoardAsync);
 
   useEffect(() => {
     const timer = setTimeout(() => setConfirmMessage(''), 2000);
@@ -47,9 +51,10 @@ const UpdateBoardForm = ({boards, onUpdateBoard}: Props) => {
       isLocked: isBoardToUpdateLocked
     }
 
-    const result = await boardService.updateBoard(boardId, board);
-
-    onUpdateBoard(result);
+    updateBoardAction({
+      id: boardId,
+      board
+    });
 
     setBoardId(boards[0].id);
     setBoardToUpdateTitle(boards[0].title);

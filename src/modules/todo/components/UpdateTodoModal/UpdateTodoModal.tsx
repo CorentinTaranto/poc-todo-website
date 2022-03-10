@@ -1,5 +1,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import Modal from 'react-modal';
+import { updateTodoAsync } from '../../../board/board.slice';
+import useAction from '../../../shared/hooks/useAction.hook';
 import Todo from '../../models/Todo';
 import UpdateTodo from '../../models/UpdateTodo';
 import todoService from '../../services/todo.service';
@@ -30,6 +32,8 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
   const [description, setDescription] = useState(todo.description);
   const [deadline, setDeadline] = useState(todo.deadline ? todo.deadline.substring(0,10) + 'T' + todo.deadline.substring(11, 16) : '');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const updateTodoAction = useAction(updateTodoAsync);
 
   useEffect(() => {
     const timer = setTimeout(() => setErrorMessage(''), 2000);
@@ -62,9 +66,10 @@ const UpdateTodoModal = ({todo, onUpdateTodo}: Props) => {
       deadline: deadline === '' ? null : deadline
     };
 
-    const result = await todoService.updateTodo(todo.id, todoToUpdate);
-
-    onUpdateTodo(result);
+    updateTodoAction({
+      id: todo.id,
+      todo: todoToUpdate
+    });
 
     setIsOpen(false);
   }
